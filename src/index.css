@@ -8,51 +8,53 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    /* BITS Goa Anonymous Chat Colors */
+    --background: 43 63% 7%; /* Smoky Black */
+    --foreground: 61 100% 99%; /* Baby Powder */
+    
+    --card: 61 100% 99%; /* Baby Powder for cards */
+    --card-foreground: 43 63% 7%; /* Dark text on light cards */
+    
+    --popover: 61 100% 99%;
+    --popover-foreground: 43 63% 7%;
+    
+    --primary: 169 44% 48%; /* Keppel accent */
+    --primary-foreground: 61 100% 99%;
+    
+    --secondary: 299 60% 19%; /* Russian Violet */
+    --secondary-foreground: 61 100% 99%;
+    
+    --muted: 43 30% 15%; /* Muted dark */
+    --muted-foreground: 61 50% 80%;
+    
+    --accent: 169 44% 48%; /* Keppel */
+    --accent-foreground: 43 63% 7%;
+    
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 61 100% 99%;
+    
+    --border: 43 30% 20%;
+    --input: 43 30% 15%;
+    --ring: 169 44% 48%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --radius: 0.75rem;
+    
+    /* Channel Sidebar */
+    --sidebar-background: 43 50% 10%;
+    --sidebar-foreground: 61 100% 99%;
+    --sidebar-primary: 169 44% 48%;
+    --sidebar-primary-foreground: 61 100% 99%;
+    --sidebar-accent: 43 30% 15%;
+    --sidebar-accent-foreground: 61 100% 99%;
+    --sidebar-border: 43 30% 20%;
+    --sidebar-ring: 169 44% 48%;
+    
+    /* Custom Design Tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(169 44% 48%), hsl(169 44% 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(299 60% 19%), hsl(299 60% 30%));
+    --shadow-soft: 0 10px 30px -10px hsl(43 63% 7% / 0.5);
+    --shadow-glow: 0 0 40px hsl(169 44% 48% / 0.3);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
