@@ -54,29 +54,36 @@ export default function MessageInput({ onSendMessage, isLoading }: MessageInputP
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border-t border-border bg-card">
-      <div className="flex gap-2">
+    <form onSubmit={handleSubmit} className="p-3 border-t border-border bg-card">
+      <div className="flex gap-2 items-end">
         <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Share anonymously..."
-          className="resize-none h-20 bg-input border-border text-foreground placeholder:text-muted-foreground"
+          className="resize-none min-h-[40px] h-[40px] bg-input border-border text-foreground placeholder:text-muted-foreground py-2"
           maxLength={500}
           disabled={isLoading}
+          style={{ height: 'auto' }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+          }}
         />
         <Button
           type="submit"
-          size="lg"
+          size="icon"
           disabled={!message.trim() || isLoading}
-          className="bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+          className="bg-primary text-primary-foreground hover:opacity-90 transition-opacity h-10 w-10"
         >
-          <Send className="w-5 h-5" />
+          <Send className="w-4 h-4" />
         </Button>
       </div>
-      <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-        <span>{message.length}/500 characters</span>
-        <span>Your message will auto-delete in 24 hours</span>
-      </div>
+      {message.length > 400 && (
+        <div className="mt-1 text-xs text-muted-foreground">
+          {message.length}/500 characters
+        </div>
+      )}
     </form>
   );
 }
