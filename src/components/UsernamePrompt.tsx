@@ -35,7 +35,7 @@ export default function UsernamePrompt({ onUsernameSet }: UsernamePromptProps) {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">
+              <label htmlFor="username" className="text-sm font-medium text-white">
                 Your Username
               </label>
               <div className="flex gap-2">

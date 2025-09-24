@@ -38,7 +38,7 @@ const Index = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden fixed top-4 left-4 z-50 bg-card shadow-lg text-foreground hover:bg-accent"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-primary shadow-lg text-white hover:bg-primary"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
