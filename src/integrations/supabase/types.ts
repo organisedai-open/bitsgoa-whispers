@@ -81,9 +81,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_messages: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       delete_old_messages: {
         Args: Record<PropertyKey, never>
-        Returns: undefined
+        Returns: number
       }
     }
     Enums: {
