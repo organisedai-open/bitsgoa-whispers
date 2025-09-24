@@ -154,10 +154,7 @@ export default function ChatArea({ channel, username, sessionId }: ChatAreaProps
 
   return (
     <div className="flex-1 flex flex-col h-screen bg-background">
-      <div className="bg-card border-b border-border p-4 flex items-center gap-3">
-        <div className="p-2 bg-primary rounded-lg text-primary-foreground">
-          {channelIcons[channel as keyof typeof channelIcons]}
-        </div>
+      <div className="bg-card border-b border-border p-4">
         <div>
           <h2 className="text-lg font-semibold text-card-foreground capitalize">
             #{channel}
