@@ -3,6 +3,7 @@ import ChannelSidebar from "@/components/ChannelSidebar";
 import ChatArea from "@/components/ChatArea";
 import UsernamePrompt from "@/components/UsernamePrompt";
 import { getSessionId } from "@/utils/session";
+import { deleteExpiredMessages } from "@/utils/cleanup";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -20,6 +21,18 @@ const Index = () => {
     }
     
     setSessionId(getSessionId());
+    // Clean expired messages on load and every 10 minutes
+    deleteExpiredMessages();
+    const interval = setInterval(deleteExpiredMessages, 10 * 60 * 1000);
+    
+    // Add event listener for sidebar toggle
+    const handleToggleSidebar = () => setSidebarOpen(prev => !prev);
+    window.addEventListener('toggle-sidebar', handleToggleSidebar);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('toggle-sidebar', handleToggleSidebar);
+    };
   }, []);
 
   const handleUsernameSet = (newUsername: string) => {
@@ -33,17 +46,7 @@ const Index = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Mobile Menu Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="lg:hidden fixed top-4 left-4 z-50 bg-primary shadow-lg text-white hover:bg-primary"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </Button>
-
+    <div className="flex h-screen mobile-layout mobile-full-height lg:h-screen overflow-hidden" style={{ backgroundColor: '#1F1C09' }}>
       {/* Sidebar - Desktop */}
       <div className="hidden lg:block">
         <ChannelSidebar 
@@ -53,20 +56,21 @@ const Index = () => {
       </div>
 
       {/* Sidebar - Mobile */}
+      {sidebarOpen && (
+        <div className="lg:hidden mobile-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
       <div className={`
-        lg:hidden fixed inset-0 z-40 transition-transform duration-300
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:hidden mobile-sidebar
+        ${sidebarOpen ? 'open' : ''}
       `}>
-        <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-        <div className="relative">
-          <ChannelSidebar 
-            selectedChannel={selectedChannel}
-            onChannelSelect={(channel) => {
-              setSelectedChannel(channel);
-              setSidebarOpen(false);
-            }}
-          />
-        </div>
+        <ChannelSidebar 
+          selectedChannel={selectedChannel}
+          onChannelSelect={(channel) => {
+            setSelectedChannel(channel);
+            setSidebarOpen(false);
+          }}
+          onClose={() => setSidebarOpen(false)}
+        />
       </div>
 
       {/* Chat Area */}

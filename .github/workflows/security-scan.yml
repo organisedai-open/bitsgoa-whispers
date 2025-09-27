@@ -1,0 +1,159 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    name: Security Audit
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for secrets scanning
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run npm audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+    
+    - name: Install detect-secrets
+      run: |
+        pip install detect-secrets
+    
+    - name: Run detect-secrets scan
+      run: |
+        detect-secrets scan --baseline .secrets.baseline || true
+        detect-secrets audit .secrets.baseline || true
+      continue-on-error: true
+    
+    - name: Install trufflehog
+      run: |
+        wget https://github.com/trufflesecurity/trufflehog/releases/download/v3.63.0/trufflehog_3.63.0_linux_amd64.tar.gz
+        tar -xzf trufflehog_3.63.0_linux_amd64.tar.gz
+        sudo mv trufflehog /usr/local/bin/
+    
+    - name: Run trufflehog scan
+      run: |
+        trufflehog filesystem . --json --output trufflehog-results.json || true
+      continue-on-error: true
+    
+    - name: Run ESLint security checks
+      run: |
+        npx eslint . --config eslint.config.js --format json --output-file eslint-results.json || true
+      continue-on-error: true
+    
+    - name: Check for hardcoded secrets
+      run: |
+        echo "Checking for hardcoded secrets..."
+        if grep -r "AIzaSy" src/; then
+          echo "::error::Firebase API key found in source code"
+          exit 1
+        fi
+        if grep -r "sk-" src/; then
+          echo "::error::Potential API key found in source code"
+          exit 1
+        fi
+        if grep -r "password.*=" src/; then
+          echo "::error::Potential password found in source code"
+          exit 1
+        fi
+    
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-scan-results
+        path: |
+          trufflehog-results.json
+          eslint-results.json
+        retention-days: 30
+
+  dependency-scan:
+    runs-on: ubuntu-latest
+    name: Dependency Security Scan
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run npm audit
+      run: |
+        npm audit --json > npm-audit-results.json || true
+        npm audit --audit-level=high
+      continue-on-error: true
+    
+    - name: Install Snyk
+      run: npm install -g snyk
+    
+    - name: Run Snyk test
+      run: |
+        snyk test --json > snyk-results.json || true
+        snyk test --severity-threshold=high || true
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    
+    - name: Upload dependency scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dependency-scan-results
+        path: |
+          npm-audit-results.json
+          snyk-results.json
+        retention-days: 30
+
+  container-scan:
+    runs-on: ubuntu-latest
+    name: Container Security Scan
+    if: false  # Disabled until Docker is implemented
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: |
+        # Add Docker build commands here when containerized
+        echo "Container scanning not applicable for this project"
+    
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
+    
+    - name: Run Trivy scan
+      run: |
+        # trivy image your-image:tag --format json --output trivy-results.json
+        echo "Container scanning placeholder"
+      continue-on-error: true

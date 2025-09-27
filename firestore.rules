@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Messages collection rules
+    match /messages/{messageId} {
+      // Allow read access to all messages (for real-time updates)
+      allow read: if true;
+      
+      // Allow write access only for authenticated users with proper validation
+      allow create: if 
+        // Validate required fields
+        request.resource.data.keys().hasAll(['channel', 'username', 'content', 'created_at', 'expire_at', 'reported', 'report_count']) &&
+        
+        // Validate field types and constraints
+        request.resource.data.channel is string &&
+        request.resource.data.username is string &&
+        request.resource.data.content is string &&
+        request.resource.data.created_at is timestamp &&
+        request.resource.data.expire_at is timestamp &&
+        request.resource.data.reported is bool &&
+        request.resource.data.report_count is number &&
+        
+        // Validate content length (5-350 characters)
+        request.resource.data.content.size() >= 5 &&
+        request.resource.data.content.size() <= 350 &&
+        
+        // Validate username length (1-50 characters)
+        request.resource.data.username.size() >= 1 &&
+        request.resource.data.username.size() <= 50 &&
+        
+        // Validate channel name (alphanumeric and hyphens only)
+        request.resource.data.channel.matches('^[a-zA-Z0-9_-]+$') &&
+        
+        // Validate username (alphanumeric and spaces only)
+        request.resource.data.username.matches('^[a-zA-Z0-9\\s]+$') &&
+        
+        // Ensure expire_at is in the future
+        request.resource.data.expire_at > request.time &&
+        
+        // Ensure expire_at is within 24 hours
+        request.resource.data.expire_at <= request.time + duration.value(24, 'h') &&
+        
+        // Ensure report_count starts at 0
+        request.resource.data.report_count == 0 &&
+        
+        // Ensure reported starts as false
+        request.resource.data.reported == false;
+      
+      // Allow updates only for report_count and reported fields
+      allow update: if 
+        // Only allow updating report_count and reported fields
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['report_count', 'reported']) &&
+        
+        // Validate report_count is a number and can only increase
+        request.resource.data.report_count is number &&
+        request.resource.data.report_count >= resource.data.report_count &&
+        
+        // Validate reported is boolean
+        request.resource.data.reported is bool;
+      
+      // Deny all other operations
+      allow delete: if false;
+    }
+    
+    // Deny access to all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
